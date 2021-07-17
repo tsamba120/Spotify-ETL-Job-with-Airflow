@@ -6,6 +6,7 @@ from datetime import datetime as dt, time
 import datetime
 import psycopg2
 import sqlalchemy
+from config import spotify_client_id, spotify_client_secret
 
 
 def extract_data():
@@ -14,8 +15,6 @@ def extract_data():
     Returns dictionaries to be transformed into tables
     '''
 
-    spotify_client_id = '8144be8952304b279edba66aff8ca782'
-    spotify_client_secret = 'b45fe683ebf547109658210d3f259256'
     spotify_redirect_url = 'http://localhost'
     scope = 'user-read-recently-played'
 
