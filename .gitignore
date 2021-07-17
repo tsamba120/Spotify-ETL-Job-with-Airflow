@@ -2,3 +2,4 @@ spotify_etl.code-workspace
 .cache
 Python/config.py
 Python/__pycache__*
+response_sample.txt
