@@ -1,0 +1,40 @@
+//// -- LEVEL 1
+//// -- Tables and References
+
+// For use in dbdiagram.io
+
+// Creating tables
+Table song_plays as P {
+  play_id varchar [pk, not null, increment] // auto-increment
+  song_id varchar [ref: > S.song_id, not null]
+  artist_id varchar [ref: > A.artist_id, not null]
+  played_at timestamp [pk, not null]
+  timestamp timestamp [not null]
+}
+
+Table dim_songs as S {
+  song_id int [pk]
+  song_name varchar
+  song_url varchar
+  duration_ms int
+  album_id varchar [ref: > F.album_id]
+  track_number int
+  popularity int
+ }
+ 
+Table dim_artists as A {
+  artist_id varchar [pk]
+  artist_name varchar
+  artist_url varchar
+}
+
+Table dim_albums as F{
+  album_id varchar [pk]
+  album_name varchar
+  release_date int
+  total_tracks int
+  album_url varchar
+}
+
+
+

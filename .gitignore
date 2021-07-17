@@ -1,0 +1,4 @@
+spotify_etl.code-workspace
+.cache
+Python/config.py
+Python/__pycache__*
