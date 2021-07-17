@@ -281,10 +281,4 @@ def spotify_etl_func():
 
 
 if __name__ == '__main__':
-    song_plays, dim_songs, dim_artists, dim_albums = extract_data()
-    song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df = transform_data(song_plays, dim_songs, dim_artists, dim_albums)
-    if validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
-        pass
-    load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df)
-    
-    print(f"Daily Spotify ETL Job Completed - {dt.now().strftime('%m/%d/%Y - %H:%M:%S')}")
+    spotify_etl_func()
