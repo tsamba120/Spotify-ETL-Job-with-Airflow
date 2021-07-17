@@ -6,7 +6,7 @@ from datetime import datetime as dt, time
 import datetime
 import psycopg2
 import sqlalchemy
-from config import spotify_client_id, spotify_client_secret
+from config import spotify_client_id, spotify_client_secret, dbname, password
 
 
 def extract_data():
@@ -195,9 +195,9 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
     '''
     #Establish connections
     pg_conn = psycopg2.connect(
-        dbname='Spotify Data',
+        dbname=dbname,
         user='postgres',
-        password='babsy1995'
+        password=password
         )
     pg_curr = pg_conn.cursor()
 
