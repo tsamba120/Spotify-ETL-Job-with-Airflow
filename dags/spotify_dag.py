@@ -9,6 +9,7 @@ from Python.etl_spotify import spotify_etl_func
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
+    'start_date': days_ago(2),
     'email': ['terencerustia@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': True,
@@ -25,6 +26,6 @@ dag = DAG(
 
 execute_spotify_job = PythonOperator(
     task_id='spotify_etl_pgsql',
-    python_callable='spotify_etl_func',
+    python_callable=spotify_etl_func,
     dag=dag
 )

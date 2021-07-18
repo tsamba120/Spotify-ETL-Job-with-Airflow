@@ -6,7 +6,7 @@ from datetime import datetime as dt, time
 import datetime
 import psycopg2
 import sqlalchemy
-from config import spotify_client_id, spotify_client_secret, dbname, password
+from Python.config import spotify_client_id, spotify_client_secret, dbname, password
 
 
 def extract_data():
