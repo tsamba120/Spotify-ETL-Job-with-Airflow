@@ -4,7 +4,7 @@ import datetime
 from airflow import DAG # DAG object
 from airflow.operators.python import PythonOperator # Python operator
 from airflow.utils.dates import days_ago
-from Python.etl_spotify import spotify_etl_func
+from Python.etl_spotify import spotify_etl_func, test_func
 
 
 default_args = {
@@ -27,7 +27,7 @@ dag = DAG(
 
 execute_spotify_job = PythonOperator(
     task_id='spotify_etl_pgsql',
-    python_callable=spotify_etl_func,
+    python_callable=test_func,
     dag=dag
 )
 

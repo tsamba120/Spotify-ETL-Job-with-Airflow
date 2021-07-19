@@ -6,7 +6,7 @@ from datetime import datetime as dt, time
 import datetime
 import psycopg2
 import sqlalchemy
-from Python.config import spotify_client_id, spotify_client_secret, dbname, password
+from config import spotify_client_id, spotify_client_secret, dbname, password
 
 
 def extract_data():
@@ -15,7 +15,7 @@ def extract_data():
     Returns dictionaries to be transformed into tables
     '''
 
-    spotify_redirect_url = 'http://localhost'
+    spotify_redirect_url = 'http://localhost/'
     scope = 'user-read-recently-played'
 
     # Timestamp parameters
@@ -278,7 +278,8 @@ def spotify_etl_func():
     
     print(f"Daily Spotify ETL Job Completed - {dt.now().strftime('%m/%d/%Y - %H:%M:%S')}")
 
-
+def test_func():
+    print('Testing that this DAG is working')
 
 if __name__ == '__main__':
     spotify_etl_func()
