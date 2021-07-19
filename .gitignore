@@ -1,7 +1,7 @@
 spotify_etl.code-workspace
 .cache
-Python/config.py
-Python/__pycache__*
+dags/config.py
+dags/__pycache__*
 response_sample.txt
 *__pycache__*
 airflow/*
