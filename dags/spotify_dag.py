@@ -6,6 +6,9 @@ from airflow.operators.python import PythonOperator # Python operator
 from airflow.utils.dates import days_ago
 from etl_spotify import spotify_etl_func, test_func
 
+# CHANGE AIRFLOW DIRECTORIES ALWAYS: 
+#   https://stackoverflow.com/questions/52698704/how-to-change-the-dag-bag-folder-for-airflow-web-ui
+# check $airflow config list
 
 default_args = {
     'owner': 'airflow',
@@ -27,7 +30,7 @@ dag = DAG(
 
 execute_spotify_job = PythonOperator(
     task_id='spotify_etl_pgsql',
-    python_callable=test_func,
+    python_callable=spotify_etl_func,
     dag=dag
 )
 
