@@ -10,7 +10,7 @@ smtp_server = 'smtp.gmail.com'
 receiver_email = 'terencerustia@gmail.com'
 
 message = MIMEMultipart('alternative')
-message['Subject'] = 'multipart test'
+message['Subject'] = 'Your Weekly Spotify Metrics'
 message['From'] = sender_email
 message['To'] = receiver_email
 
@@ -23,10 +23,12 @@ text = '''\
 html = '''\
     <html>
         <body>
-            <p>Hi, <br>
-            How are you?<br>
-            <a href="https://www.linkedin.com/in/terence-sambajon-rustia-a65267b2/">Terence's LinkedIn Page</a>
-            </p>
+            <div style="background-color: black;">
+                <h1 style="color: #1DB954;">Terence's Weekly Spotify Metrics</h1>
+                <p style="color: white";>
+                    What a week of music! Let's see what you've been listening to.
+                </p>
+            </div>
         </body>
     </html>
     '''
@@ -46,4 +48,4 @@ context = ssl.create_default_context()
 
 with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
     server.login(sender_email, em_password)
-    server.sendmail(sender_email, receiver_email, message)
+    server.sendmail(sender_email, receiver_email, message.as_string())
