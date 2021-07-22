@@ -9,6 +9,7 @@ from etl_spotify import spotify_etl_func, test_func
 # CHANGE AIRFLOW DIRECTORIES ALWAYS: 
 #   https://stackoverflow.com/questions/52698704/how-to-change-the-dag-bag-folder-for-airflow-web-ui
 # check $airflow config list
+# CHANGE TO PROJECT DIRECTORY
 
 default_args = {
     'owner': 'airflow',
