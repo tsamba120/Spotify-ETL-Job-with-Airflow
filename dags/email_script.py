@@ -1,8 +1,63 @@
 import psycopg2
 import smtplib, ssl
+from datetime import datetime as dt
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from config import sender_email, em_password
+from tabulate import tabulate
+import re
+from config import sender_email, em_password, dbname, password
+
+
+def weekly_email_SQL_calc():
+    '''
+    Function that calls stored SQL functions that calculate Spotify listen summary statistics
+    '''
+    # Establish DB Conn
+    conn = psycopg2.connect(
+        dbname=dbname,
+        user='postgres',
+        password=password
+    )
+
+    curr = conn.cursor()
+    
+    # Create temp table in backend database
+    curr.callproc('create_temp_table')
+
+    # Top Songs
+    curr.callproc('past_week_top_5_songs')
+    top_5_songs = curr.fetchall()
+
+    # Top Artists
+    curr.callproc('past_week_top_5_artists')
+    top_5_artists = curr.fetchall()
+
+    # Top Albums
+    curr.callproc('top_5_albums')
+    top_5_albums = curr.fetchall()
+
+    # Listening Duration
+    curr.callproc('get_listen_duration')
+    minutes_listened = curr.fetchall()
+
+    # Most Mainstream Songs
+    curr.callproc('most_popular_songs')
+    popular_songs = curr.fetchall()
+
+    # Least Mainstream Songs
+    curr.callproc('most_obscure_songs')
+    obscure_songs = curr.fetchall()
+
+    # Drop temp table in backend
+    curr.execute('DROP TABLE song_plays_detailed;')
+    curr.close()
+
+    return top_5_songs, top_5_artists, top_5_albums, minutes_listened, popular_songs, obscure_songs
+
+
+top_5_songs, top_5_artists, top_5_albums, minutes_listened, popular_songs, obscure_songs = weekly_email_SQL_calc()
+# print(tabulate(top_5_songs, headers=['Song', 'Artist', 'Play Count'], tablefmt='orgtbl'))
+ 
 
 port = 465 # For SSL
 smtp_server = 'smtp.gmail.com'
@@ -20,14 +75,63 @@ text = '''\
     How are you?
     This is Terence'''
 
-html = '''\
+html = f'''\
     <html>
         <body>
-            <div style="background-color: black;">
-                <h1 style="color: #1DB954;">Terence's Weekly Spotify Metrics</h1>
-                <p style="color: white";>
-                    What a week of music! Let's see what you've been listening to.
+            <div style="background-color: black; color:white;">
+                <img style="text-align:center; width:200px; height:75px; margin: 10px auto 20px; display: block;" src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_CMYK_Green.png" alt="Spotify Logo">
+
+                <h1 style="color: #1DB954; text-align: center;">Terence's Weekly Spotify Metrics</h1>
+                
+                <p style="color: white; text-align: center; font-size: 15px;">
+                    {dt.today().strftime("%b %d, %Y")} - Here's a summary of your past of week of music listening:<br>
+
+                    <h2 style="text-align: center; color: #1DB954">In the past week you listened to {minutes_listened[0][0]} minutes of music!</h2>
+                     <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
                 </p>
+
+                <p style="color: white; text-align: center;">
+                    <h2 style="text-align: center; color: #1DB954">Top Five Songs of the Week:</h2>
+                    {re.sub('<table>', '<table align="center">', tabulate(top_5_songs, headers=['Song', 'Artist', 'Play Count'], tablefmt='html'))}
+                    <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
+                </p>
+
+                <p style="color: white; text-align: center;">
+                    <h2 style="text-align: center; color: #1DB954">Top Five Artists of the Week:</h2>
+                    {re.sub('<table>', '<table align="center">', tabulate(top_5_artists, headers=['Artist', 'Play Count'], tablefmt='html'))}
+                    <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
+                </p>
+
+                <p style="color: white; text-align: center;">
+                    <h2 style="text-align: center; color: #1DB954">Top Five Albums of the Week:</h2>
+                    {re.sub('<table>', '<table align="center">', tabulate(top_5_albums, headers=['Album', 'Artist', 'Play Count'], tablefmt='html'))}
+                    <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
+                </p>
+
+                <p style="color: white; text-align: center;">
+                    <h2 style="text-align: center; color: #1DB954">Most Mainstream Songs:</h2>
+                    {re.sub('<table>', '<table align="center">', tabulate(popular_songs, headers=['Song', 'Artist', 'Popularity Rank'], tablefmt='html'))}
+                    <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
+                </p>
+
+                <p style="color: white; text-align: center;">
+                    <h2 style="text-align: center; color: #1DB954">Least Mainstream Songs:</h2>
+                    {re.sub('<table>', '<table align="center">', tabulate(obscure_songs, headers=['Song', 'Artist', 'Popularity Rank'], tablefmt='html'))}
+                    <p style="color: white; text-align: center;">
+                        _________________________________________________
+                    </p>
+                </p>
+ 
             </div>
         </body>
     </html>
@@ -46,6 +150,7 @@ message.attach(part2)
 # Create a secure SSL context connection with server and send email
 context = ssl.create_default_context()
 
+# Send email
 with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
     server.login(sender_email, em_password)
     server.sendmail(sender_email, receiver_email, message.as_string())
