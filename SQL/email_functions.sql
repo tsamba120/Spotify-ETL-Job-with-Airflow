@@ -138,7 +138,7 @@ AS $$
 		FROM (
 			SELECT *,
 				CASE
-					WHEN release_date = '2003' THEN '2003-01-01'
+					WHEN LENGTH(release_date) < 10 THEN release_date||'-01-01'
 					ELSE release_date
 				END cleaned_release_date
 			FROM song_plays_detailed) subq
@@ -188,5 +188,3 @@ select most_obscure_songs();
 select top_5_albums();
 -- Drop temp table from first function
 DROP TABLE song_plays_detailed;
-
-
