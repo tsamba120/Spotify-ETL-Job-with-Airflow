@@ -55,9 +55,7 @@ def weekly_email_SQL_calc():
     return top_5_songs, top_5_artists, top_5_albums, minutes_listened, popular_songs, obscure_songs
 
 
-top_5_songs, top_5_artists, top_5_albums, minutes_listened, popular_songs, obscure_songs = weekly_email_SQL_calc()
-# print(tabulate(top_5_songs, headers=['Song', 'Artist', 'Play Count'], tablefmt='orgtbl'))
- 
+top_5_songs, top_5_artists, top_5_albums, minutes_listened, popular_songs, obscure_songs = weekly_email_SQL_calc() 
 
 port = 465 # For SSL
 smtp_server = 'smtp.gmail.com'
@@ -72,17 +70,19 @@ message['To'] = receiver_email
 # Create the plain-text and HTML version of your message
 text = '''\
     Hi,
-    How are you?
-    This is Terence'''
+    Here's your weekly Spotify metrics.
+    '''
 
 html = f'''\
     <html>
         <body>
             <div style="background-color: black; color:white;">
-                <img style="text-align:center; width:200px; height:75px; margin: 10px auto 20px; display: block;" src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_CMYK_Green.png" alt="Spotify Logo">
+                <img style="text-align:center; width:220px; height:75px; margin: 20px auto 20px; display: block;" src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_CMYK_Green.png" alt="Spotify Logo">
 
                 <h1 style="color: #1DB954; text-align: center;">Terence's Weekly Spotify Metrics</h1>
                 
+                <img style="text-align:center; width:250px; height:280px; margin: 10px auto 20px; display: block;" src="https://i.scdn.co/image/ab6775700000ee85bb77683134170c0280a783fa" alt="Terence's Profile Photo">
+
                 <p style="color: white; text-align: center; font-size: 15px;">
                     {dt.today().strftime("%b %d, %Y")} - Here's a summary of your past of week of music listening:<br>
 
