@@ -175,6 +175,9 @@ $$;
 SELECT top_5_albums();
 
 
+/*
+Queries to run all the above
+*/
 -- Test functions
 select create_temp_table();
 select past_week_top_5_songs();
@@ -183,6 +186,7 @@ select get_listen_duration();
 select most_popular_songs();
 select most_obscure_songs();
 select top_5_albums();
-
 -- Drop temp table from first function
 DROP TABLE song_plays_detailed;
+
+
