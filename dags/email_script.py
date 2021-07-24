@@ -73,6 +73,7 @@ text = '''\
     Here's your weekly Spotify metrics.
     '''
 
+# HTML text for email, unfortunately CSS styling must be done in-line to be Gmail compatible
 html = f'''\
     <html>
         <body>
@@ -151,6 +152,14 @@ message.attach(part2)
 context = ssl.create_default_context()
 
 # Send email
-with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-    server.login(sender_email, em_password)
-    server.sendmail(sender_email, receiver_email, message.as_string())
+def send_weekly_email():
+    '''
+    This function will create a context to send the weekly email
+    Will be used in our Airflow job's email DAG
+    '''
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, em_password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+
+if __name__ == "__main__":
+    send_weekly_email()
