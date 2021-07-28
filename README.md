@@ -1,3 +1,1 @@
-# Spotify-ETL-Job
-
-## Background
+# Spotify ETL Job & Weekly Metrics Email
