@@ -6,3 +6,4 @@ response_sample.txt
 *__pycache__*
 airflow/*
 .DS_STORE
+test.py
