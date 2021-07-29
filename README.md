@@ -25,7 +25,7 @@ The temporary dictionaries from the previous step were then transformed into Pan
 The *unique listens* table *song_plays* consists of unique songs I listened to at any given time in the prior 24 hours. Because I cannot technically listen to two songs simultaneously, I set the table's primary key to be the timestamp column, *played_at*. This table also possesses foreign keys to dimension tables that provide further information on song name, artist name, and album name. 
 
 ## V. Loading Data to a PostgreSQL Database
-<img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Database%20Modeling/postgres_database_model.png" width="800" height="500" style="align:center;"/>
+<img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Database%20Modeling/postgres_database_model.png" width="750" height="400" style="align:center;"/>
 
 
 ## VI. Weekly Summary Email
