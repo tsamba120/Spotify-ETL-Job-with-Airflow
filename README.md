@@ -25,7 +25,7 @@ The temporary dictionaries from the previous step were then transformed into Pan
 The *unique listens* table *song_plays* consists of unique songs I listened to at any given time in the prior 24 hours. Because I cannot technically listen to two songs simultaneously, I set the table's primary key to be the timestamp column, *played_at*. This table also possesses foreign keys to dimension tables that provide further information on song name, artist name, and album name. 
 
 ## V. Loading Data to a PostgreSQL Database
-![database model](Database Modeling/postgres_database_model.png)
+![database model](./Database Modeling/postgres_database_model.png)
 
 ## VI. Weekly Summary Email
 
