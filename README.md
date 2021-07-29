@@ -23,3 +23,9 @@ See "V. Loading to Database" for schema details.
 The temporary dictionaries from the previous step were then transformed into Pandas dataframes to be converted into staging tables. The four tables represent *unique listens* (fact), *songs* (dimension), *artists* (dimension), *albums* (dimension). 
 
 The *unique listens* table *song_plays* consists of unique songs I listened to at any given time in the prior 24 hours. Because I cannot technically listen to two songs simultaneously, I set the table's primary key to be the timestamp column, *played_at*. This table also possesses foreign keys to dimension tables that provide further information on song name, artist name, and album name. 
+
+## V. Loading Data to a PostgreSQL Database
+
+## VI. Weekly Summary Email
+
+## VII. Reflections & Plans for Future Improvement
