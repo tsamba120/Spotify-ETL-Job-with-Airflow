@@ -21,6 +21,9 @@ def weekly_email_SQL_calc():
 
     curr = conn.cursor()
     
+    # Drop temp table if it exists from previous instance
+    curr.execute('DROP TABLE IF EXISTS song_plays_detailed;')
+
     # Create temp table in backend database
     curr.callproc('create_temp_table')
 
