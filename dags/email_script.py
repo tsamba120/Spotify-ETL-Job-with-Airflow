@@ -163,6 +163,7 @@ def send_weekly_email():
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, em_password)
         server.sendmail(sender_email, receiver_email, message.as_string())
+        print('Email sent')
 
 if __name__ == "__main__":
     send_weekly_email()
