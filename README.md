@@ -26,6 +26,7 @@ The *unique listens* table *song_plays* consists of unique songs I listened to a
 
 ## V. Loading Data to a PostgreSQL Database
 The staging tables were then loaded using SQL to the corresponding tables with the names and primary key/foreign key relationship shown in the data model below.
+
 <img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Database%20Modeling/postgres_database_model.png" width="700" height="400" style="align:center;"/>
 
 
