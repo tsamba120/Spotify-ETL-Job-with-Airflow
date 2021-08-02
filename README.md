@@ -41,7 +41,7 @@ Following this, I used Python, HTML, and CSS to design and send an automated ema
 * Most mainstream songs (by popularity score)
 * Least mainstream songs (by popularity score)
 
-## VII. Improvment Plans
+## VII. Improvement Plans
 In progress:
 * To stay in compliance with popular ETL/ELT frameworks that recommend storing raw data, I am implementing a feature that saves the daily extracted data onto an AWS S3 bucket, which will be later accessed for data transformation. I am currently implementing this and learning how to leverage object keys and prefixes to only transform specific extracts.
 * At the time of this writing the ETL orchestration in Airflow is run through a single "task" that triggers all ETL-related scripts. As I include new features such as an S3 implementation, I would like to partition this task into three dedicated tasks for extraction, transformation, and loading respectively.
