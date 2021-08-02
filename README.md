@@ -25,9 +25,19 @@ The temporary dictionaries from the previous step were then transformed into Pan
 The *unique listens* table *song_plays* consists of unique songs I listened to at any given time in the prior 24 hours. Because I cannot technically listen to two songs simultaneously, I set the table's primary key to be the timestamp column, *played_at*. This table also possesses foreign keys to dimension tables that provide further information on song name, artist name, and album name. 
 
 ## V. Loading Data to a PostgreSQL Database
+The staging tables were then loaded using SQL to the corresponding tables with the names and primary key/foreign key relationship shown in the data model below.
 <img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Database%20Modeling/postgres_database_model.png" width="700" height="400" style="align:center;"/>
 
 
 ## VI. Weekly Summary Email
+After creating the SQL functions to query the appropriate metrics, I used Python, HTML, and CSS to design and send a weekly email that shows weekly Spotify summary statistics. The following metrics were collected or calculate:
+* Total music listening length
+* Top 5 songs
+* Top 5 artists
+* Top 5 albums
+* Most mainstream songs (by popularity score)
+* Least mainstream songs (by popularity score)
 
 ## VII. Reflections & Plans for Future Improvement
+In progress:
+* To stay in compliance with popular ETL/ELT frameworks, I am implementing a feature that saves the daily extracted raw data onto AWS S3 buckets, which will then be access for data transforamtion.
