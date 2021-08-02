@@ -31,7 +31,9 @@ The staging tables were then loaded using SQL to the corresponding tables with t
 
 
 ## VI. Weekly Summary Email
-After creating the SQL functions to query the appropriate metrics, I used Python, HTML, and CSS to design and send a weekly email that shows weekly Spotify summary statistics. The following metrics were collected or calculate:
+Prior to the scripting the email, used SQL to create a temporary table of the prior week's song plays and user-defined functions to run summary statistic calculations. The SQL code can be found [here](https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/SQL/email_functions.sql).
+
+Following this, I used Python, HTML, and CSS to design and send an automated email that shows weekly Spotify summary statistics. The following metrics were collected or calculate:
 * Total music listening length
 * Top 5 songs
 * Top 5 artists
@@ -39,6 +41,12 @@ After creating the SQL functions to query the appropriate metrics, I used Python
 * Most mainstream songs (by popularity score)
 * Least mainstream songs (by popularity score)
 
-## VII. Reflections & Plans for Future Improvement
+## VII. Improvment Plans
 In progress:
-* To stay in compliance with popular ETL/ELT frameworks, I am implementing a feature that saves the daily extracted raw data onto AWS S3 buckets, which will then be access for data transforamtion.
+* To stay in compliance with popular ETL/ELT frameworks that recommend storing raw data, I am implementing a feature that saves the daily extracted data onto an AWS S3 bucket, which will be later accessed for data transformation. I am currently implementing this and learning how to leverage object keys and prefixes to only transform specific extracts.
+* At the time of this writing the ETL orchestration in Airflow is run through a single "task" that triggers all ETL-related scripts. As I include new features such as an S3 implementation, I would like to partition this task into three dedicated tasks for extraction, transformation, and loading respectively.
+
+## VIII. Conclusion/Thoughts
+This project was an immense learning experience and a wonderful opportunity to hone my ETL skills while leveraging new technologies such as Apache Airflow and AWS S3 buckets. Adding new features such as an AWS S3 implementation also allowed me to practice branching and merging with Git, which I have not done much of prior to this project. 
+
+I have used Spotify since I was 16 years old and it was lovely to incorporate my love for the app with my aspirations towards data engineering!
