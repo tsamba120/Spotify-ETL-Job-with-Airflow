@@ -197,7 +197,7 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
     pg_conn = psycopg2.connect(
         dbname=dbname,
         user='postgres',
-        password=password
+        password=db_password
         )
     pg_curr = pg_conn.cursor()
 
