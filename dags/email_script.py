@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from tabulate import tabulate
 import re
-from config import sender_email, em_password, dbname, password
+from config import sender_email, em_password, dbname, db_password
 
 
 def weekly_email_SQL_calc():
@@ -16,7 +16,7 @@ def weekly_email_SQL_calc():
     conn = psycopg2.connect(
         dbname=dbname,
         user='postgres',
-        password=password
+        password=db_password
     )
 
     curr = conn.cursor()
