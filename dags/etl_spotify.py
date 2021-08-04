@@ -12,6 +12,8 @@ import psycopg2
 import sqlalchemy
 from config import spotify_client_id, spotify_client_secret, dbname, db_password, S3_BUCKET, AWS_ACCESS_KEY_ID, SECRET_ACCESS_KEY
 
+# TODO: UPDATE AWS BUCKET NAME & OBJECT FILE NAME
+
 # TODO: Delete original extract_data() funct
 def extract_data():
     '''
@@ -167,7 +169,7 @@ def extract_stage_data(ti):
        aws_secret_access_key=SECRET_ACCESS_KEY)
 
    # Create bucket/key object
-    obj = s3.Object(S3_BUCKET, time_stamp + '/test.gzip')
+    obj = s3.Object(S3_BUCKET, time_stamp + '/daily_songs_extract.gzip')
 
     # Upload object
     obj.put(Body=gz_file)
@@ -188,7 +190,7 @@ def transform_data(ti):
         aws_secret_access_key=SECRET_ACCESS_KEY)
 
     # Create bucket/key object
-    obj = s3.Object(S3_BUCKET, load_timestamp + '/test.gzip')
+    obj = s3.Object(S3_BUCKET, load_timestamp + '/daily_songs_extract.gzip')
 
     # Parse object to JSON then read, uses same object defined above
     s3_obj_data = obj.get()['Body'].read()
@@ -296,7 +298,7 @@ def transform_data(ti):
     return song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df
     
 
-# TODO: Delete original transform_data() function
+# TODO: DELETE 
 def transform_data(song_plays, dim_songs, dim_artists, dim_albums):
     '''
     Transforms passed data dictionaries into dataframes
@@ -442,6 +444,8 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
     alc_conn.close()
     pg_conn.close()
 
+
+# USE
 # TODO: Edit below function based on new S3 feature
 ## Figure out what to do with "ti" argument!!!
 def transform_load_data(ti):
