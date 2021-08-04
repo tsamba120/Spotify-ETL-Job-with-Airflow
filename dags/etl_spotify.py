@@ -1,12 +1,16 @@
-import pandas as pd
+import json
+import gzip
+import re
+import boto3
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import sys
 from datetime import datetime as dt, time
 import datetime
+import pandas as pd
 import psycopg2
 import sqlalchemy
-from config import spotify_client_id, spotify_client_secret, dbname, db_password
+from config import spotify_client_id, spotify_client_secret, dbname, db_password, S3_BUCKET, AWS_ACCESS_KEY_ID, SECRET_ACCESS_KEY
 
 
 def extract_data():
@@ -121,7 +125,156 @@ def extract_data():
     print('Data extraction completed\n--------')
     return song_plays, dim_songs, dim_artists, dim_albums
 
+def extract_stage_data(ti):
+        
+    spotify_redirect_url = 'http://localhost/'
 
+    scope = 'user-read-recently-played'
+
+    # Timestamp parameters
+    today = dt.now()
+    yday = today - datetime.timedelta(days=1)
+    yday_unix_ts = int(yday.timestamp()) * 1000 # Round to int and muliply seconds to get milliseconds
+
+    # Create timestamp variable for Airflow XCom. Variable used to pull same day S3 object for TL stages
+    time_stamp = str(today).split('.')[0]
+    time_stamp = re.sub(':', '.', time_stamp)
+
+
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=spotify_client_id,
+                                                client_secret=spotify_client_secret,
+                                                redirect_uri=spotify_redirect_url,
+                                                scope=scope))
+
+    recently_played = sp.current_user_recently_played(limit=50, after=yday_unix_ts)
+
+    # Convert recently_played to string
+    recently_played_str = json.dumps(recently_played)
+    recently_played_json = json.loads(recently_played_str)
+
+    # Compress JSON object to gzip prior to S3 upload
+    encoded_extract = recently_played_str.encode('utf-8')
+    gz_file = gzip.compress(encoded_extract)
+    
+    # Create s3 client
+    s3 = boto3.resource('s3', 
+       aws_access_key_id=AWS_ACCESS_KEY_ID, 
+       aws_secret_access_key=SECRET_ACCESS_KEY)
+
+   # Create bucket/key object
+    obj = s3.Object(S3_BUCKET, time_stamp + '/test.gzip')
+
+    # Upload object
+    obj.put(Body=gz_file)
+
+    print('Data extraction completed')
+    print('Data uploaded to AWS S3 Bucket as gzip file\n--------')
+
+    return time_stamp
+
+def transform_data(ti):
+    load_timestamp = ti.xcom_pull(key='return_value', task_ids='s3_load')
+
+    # Create s3 client
+    s3 = boto3.resource('s3', 
+        aws_access_key_id=AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=SECRET_ACCESS_KEY)
+
+    # Create bucket/key object
+    obj = s3.Object(S3_BUCKET, load_timestamp + '/test.gzip')
+
+    # Parse object to JSON then read, uses same object defined above
+    s3_obj_data = obj.get()['Body'].read()
+    data = gzip.decompress(s3_obj_data)
+    data = data.decode('utf-8')
+    data = json.loads(data)
+
+    # Play information
+    played_at = []
+    timestamps = []
+
+    # Song information
+    song_ids = []
+    song_names = []
+    song_urls = []
+    song_durations = []
+    song_track_numbers = []
+    song_popularity = []
+
+    # Artist information
+    artist_ids = []
+    artist_names = []
+    artist_urls = []
+
+    # Album information
+    album_ids = []
+    album_names = []
+    album_release_dates = []
+    album_total_tracks = []
+    album_urls = []
+
+
+    # Extract information
+    for record in data['items']:
+
+        played_at.append(record['played_at'])
+        timestamps.append(record['played_at'][0:10])
+
+        song_ids.append(record['track']['id'])
+        song_names.append(record['track']['name'])
+        song_urls.append(record['track']['external_urls']['spotify'])
+        song_durations.append(record['track']['duration_ms'])
+        song_track_numbers.append(record['track']['track_number'])
+        song_popularity.append(record['track']['popularity'])
+
+        artist_ids.append(record['track']['artists'][0]['id'])
+        artist_names.append(record['track']['artists'][0]['name'])
+        artist_urls.append(record['track']['artists'][0]['external_urls']['spotify'])
+
+        album_ids.append(record['track']['album']['id'])
+        album_names.append(record['track']['album']['name'])
+        album_release_dates.append(record['track']['album']['release_date'])
+        album_total_tracks.append(record['track']['album']['total_tracks'])
+        album_urls.append(record['track']['album']['external_urls']['spotify'])
+
+
+    # Create table dictionaries: dict{list[]}
+    song_plays = {
+        'played_at': played_at,
+        'song_id': song_ids,
+        'artist_id': artist_ids,
+        'timestamp': timestamps
+    }
+
+    dim_songs = {
+        'song_id': song_ids,
+        'song_name': song_names,
+        'artist_id': artist_ids,
+        'album_id': album_ids,
+        'duration_ms': song_durations,
+        'track_number': song_track_numbers,
+        'popularity': song_popularity,
+        'song_url': song_urls,
+    }
+
+    dim_artists = {
+        'artist_id': artist_ids,
+        'artist_name': artist_names,
+        'artist_url': artist_urls
+    }
+
+    dim_albums = {
+        'album_id': album_ids,
+        'album_name': album_names,
+        'artist_id': artist_ids,
+        'release_date': album_release_dates,
+        'total_tracks': album_total_tracks,
+        'album_url': album_urls
+    }
+
+    
+    return song_plays, dim_songs, dim_artists, dim_albums
+    
 
 def transform_data(song_plays, dim_songs, dim_artists, dim_albums):
     '''

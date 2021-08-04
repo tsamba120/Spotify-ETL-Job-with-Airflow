@@ -35,9 +35,11 @@ sp_json = json.loads(sp_str)
 print(sp_json['track']['name'])
 print(sp_json['track']['artists'][0]['name'])
 
+# Encode then compress
 t = sp_str.encode('utf-8')
 gz = gzip.compress(t)
 
+# Decompress then decode
 decomp = gzip.decompress(gz)
 t = decomp.decode('utf-8')
 
