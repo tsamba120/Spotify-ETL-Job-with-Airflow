@@ -66,6 +66,10 @@ def extract_stage_data():
 
 
 def transform_data(ti):
+    '''
+    Function uses timestamp from XCom to load the corresponding gzip object in S3
+    Gzip file is decompressed and transformed
+    '''
     load_timestamp = ti.xcom_pull(key='return_value', task_ids='s3_load')
 
     # Create s3 client
@@ -308,6 +312,10 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
 
 
 def transform_validate_load_data(ti):
+    '''
+    Compiles transformation, validation, and loading functions into one function
+    This is for ease of passing dataframes between function calls and makes orchestrating the DAG easier
+    '''
     song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df = transform_data(ti)
     if validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
         pass
