@@ -448,7 +448,7 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
 # USE
 # TODO: Edit below function based on new S3 feature
 ## Figure out what to do with "ti" argument!!!
-def transform_load_data(ti):
+def transform_validate_load_data(ti):
     song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df = transform_data(ti)
     if validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
         pass
