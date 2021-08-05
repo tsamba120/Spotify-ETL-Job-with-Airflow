@@ -1,9 +1,8 @@
 from datetime import timedelta
 from datetime import datetime as dt
-from airflow import DAG # DAG object
-from airflow.operators.python import PythonOperator # Python operator
-from airflow.utils.dates import days_ago
-from etl_spotify import extract_stage_data, transform_validate_load_data, spotify_etl_func
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from etl_spotify import extract_stage_data, transform_validate_load_data
 
 # CHANGE AIRFLOW DIRECTORIES ALWAYS: 
 #   https://stackoverflow.com/questions/52698704/how-to-change-the-dag-bag-folder-for-airflow-web-ui
@@ -40,11 +39,5 @@ TASK_2 = PythonOperator(
     dag=dag
 )
 
-execute_spotify_job = PythonOperator(
-    task_id='spotify_etl_pgsql',
-    python_callable=spotify_etl_func,
-    dag=dag
-)
 
-execute_spotify_job
-# TASK_1 >> TASK_2
+TASK_1 >> TASK_2
