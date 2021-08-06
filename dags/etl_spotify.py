@@ -10,6 +10,7 @@ import datetime
 import pandas as pd
 import psycopg2
 import sqlalchemy
+
 from config import spotify_client_id, spotify_client_secret, dbname, db_password, S3_BUCKET, AWS_ACCESS_KEY_ID, SECRET_ACCESS_KEY
 
 def extract_stage_data():
