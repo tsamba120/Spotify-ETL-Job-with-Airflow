@@ -1,27 +1,36 @@
-import pandas as pd
+import json
+import gzip
+import re
+import boto3
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import sys
 from datetime import datetime as dt, time
 import datetime
+import pandas as pd
 import psycopg2
 import sqlalchemy
-from config import spotify_client_id, spotify_client_secret, dbname, db_password
 
+from config import spotify_client_id, spotify_client_secret, dbname, db_password, S3_BUCKET, AWS_ACCESS_KEY_ID, SECRET_ACCESS_KEY
 
-def extract_data():
+def extract_stage_data():
     '''
     Connects to Spotify API via spotipy and collects 50 most recent songs played
-    Returns dictionaries to be transformed into tables
+    Compresses data to gzip file then uploads in AWS S3 data lake
     '''
 
     spotify_redirect_url = 'http://localhost/'
+
     scope = 'user-read-recently-played'
 
     # Timestamp parameters
     today = dt.now()
     yday = today - datetime.timedelta(days=1)
     yday_unix_ts = int(yday.timestamp()) * 1000 # Round to int and muliply seconds to get milliseconds
+
+    # Create timestamp variable for Airflow XCom. Variable used to pull same day S3 object for TL stages
+    time_stamp = str(today).split('.')[0]
+    time_stamp = re.sub(':', '.', time_stamp)
 
 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=spotify_client_id,
@@ -31,9 +40,53 @@ def extract_data():
 
     recently_played = sp.current_user_recently_played(limit=50, after=yday_unix_ts)
 
-    # Exits program if no results returned from Spotify
-    if len(recently_played) == 0:
-        sys.exit('No results from Spotify')
+    # Convert recently_played to string
+    recently_played_str = json.dumps(recently_played)
+    recently_played_json = json.loads(recently_played_str)
+
+    # Compress JSON object to gzip prior to S3 upload
+    encoded_extract = recently_played_str.encode('utf-8')
+    gz_file = gzip.compress(encoded_extract)
+    
+    # Create s3 client
+    s3 = boto3.resource('s3', 
+       aws_access_key_id=AWS_ACCESS_KEY_ID, 
+       aws_secret_access_key=SECRET_ACCESS_KEY)
+
+   # Create bucket/key object
+    obj = s3.Object(S3_BUCKET, time_stamp + '/daily_songs_extract.gzip')
+
+    # Upload object
+    obj.put(Body=gz_file)
+
+    print('Data extraction completed')
+    print('Data uploaded to AWS S3 Bucket as gzip file\n--------')
+
+    return time_stamp
+
+
+
+def transform_data(ti):
+    '''
+    Function uses timestamp from XCom to load the corresponding gzip object in S3
+    Gzip file is decompressed and transformed
+    '''
+    load_timestamp = ti.xcom_pull(key='return_value', task_ids='extract_stage_to_s3')
+    print('Loaded timestamp:', load_timestamp)
+    
+    # Create s3 client
+    s3 = boto3.resource('s3', 
+        aws_access_key_id=AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=SECRET_ACCESS_KEY)
+
+    # Create bucket/key object
+    obj = s3.Object(S3_BUCKET, load_timestamp + '/daily_songs_extract.gzip')
+
+    # Parse object to JSON then read, uses same object defined above
+    s3_obj_data = obj.get()['Body'].read()
+    data = gzip.decompress(s3_obj_data)
+    data = data.decode('utf-8')
+    data = json.loads(data)
 
     # Play information
     played_at = []
@@ -61,7 +114,7 @@ def extract_data():
 
 
     # Extract information
-    for record in recently_played['items']:
+    for record in data['items']:
 
         played_at.append(record['played_at'])
         timestamps.append(record['played_at'][0:10])
@@ -118,17 +171,6 @@ def extract_data():
         'album_url': album_urls
     }
 
-    print('Data extraction completed\n--------')
-    return song_plays, dim_songs, dim_artists, dim_albums
-
-
-
-def transform_data(song_plays, dim_songs, dim_artists, dim_albums):
-    '''
-    Transforms passed data dictionaries into dataframes
-    Removes duplicates from dimension tables
-    '''
-
     song_plays_df = pd.DataFrame(song_plays, columns=song_plays.keys())
     
     dim_songs_df = pd.DataFrame(dim_songs, columns=dim_songs.keys())
@@ -144,7 +186,7 @@ def transform_data(song_plays, dim_songs, dim_artists, dim_albums):
     # print(dim_artists_df.head())
     # print(dim_albums_df[['album_id', 'album_name', 'artist_id']].head())
     return song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df
-
+    
 
 
 def validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
@@ -185,6 +227,7 @@ def validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
     print('Data validation completed\n--------')
 
     return True
+
 
 
 def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add dataframe parameters!
@@ -269,17 +312,15 @@ def load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df): # Add
     pg_conn.close()
 
 
-def spotify_etl_func():
-    song_plays, dim_songs, dim_artists, dim_albums = extract_data()
-    song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df = transform_data(song_plays, dim_songs, dim_artists, dim_albums)
+
+def transform_validate_load_data(ti):
+    '''
+    Compiles transformation, validation, and loading functions into one function
+    This is for ease of passing dataframes between function calls and makes orchestrating the DAG easier
+    '''
+    song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df = transform_data(ti)
     if validate_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df):
         pass
     load_data(song_plays_df, dim_songs_df, dim_artists_df, dim_albums_df)
-    
+
     print(f"Daily Spotify ETL Job Completed - {dt.now().strftime('%m/%d/%Y - %H:%M:%S')}")
-
-def test_func():
-    print('Testing that this DAG is working')
-
-if __name__ == '__main__':
-    spotify_etl_func()
