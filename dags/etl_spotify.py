@@ -70,8 +70,9 @@ def transform_data(ti):
     Function uses timestamp from XCom to load the corresponding gzip object in S3
     Gzip file is decompressed and transformed
     '''
-    load_timestamp = ti.xcom_pull(key='return_value', task_ids='s3_load')
-
+    load_timestamp = ti.xcom_pull(key='return_value', task_ids='extract_stage_to_s3')
+    print('Loaded timestamp:', load_timestamp)
+    
     # Create s3 client
     s3 = boto3.resource('s3', 
         aws_access_key_id=AWS_ACCESS_KEY_ID, 
