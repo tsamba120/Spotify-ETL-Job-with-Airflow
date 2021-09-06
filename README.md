@@ -13,7 +13,7 @@ To automate and schedule these jobs, I utilized Airflow and built DAGs (directed
 Python (Pandas, psycopg2, SQLAlchemy, stmp, Spotipy), SQL (Postgres), Airflow, HTML/CSS
 
 ## III. Data Pipeline Overview
-<img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Database%20Modeling/https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Spotify%20ETL%20Pipeline%20Diagram.png" width="700" height="400" style="align:center;"/>
+<img src="https://github.com/tsamba120/Spotify-ETL-Job-with-Airflow/blob/main/Spotify%20ETL%20Pipeline%20Diagram.png" width="700" height="400" style="align:center;"/>
 
 ## IV. Extraction & AWS Data Lake Storage
 For the data extraction process, I used the [Spotipy](https://spotipy.readthedocs.io/en/2.18.0/) Python library which allows for a smooth interaction with the Spotify Web API. Spotipy allows for an easy connection to the [Recently Played Tracks endpoint](https://developer.spotify.com/console/get-recently-played/) and bypasses any need for token refreshing (once a Spotify Developer App is configured).
